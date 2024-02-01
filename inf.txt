@@ -1,0 +1,3 @@
+k6 run -o file.js
+k6 run -o json=file.json file.js
+k6 run -o csv=file.csv file.js
