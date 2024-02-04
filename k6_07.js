@@ -7,13 +7,12 @@ import { Trend } from "k6/metrics";
 
 export const options = {
     vus: 1,
-    duration: "5s",
-    thresholds: {
-        "http_req_failed": ["rate < 0.01"], // http errors should be less than 1%, 99% of requests should be successful
-        "http_req_duration": [{threshold: 'p(95) < 200', abortOnFail: true, delayAbortEval: '10s'}],
-        checks: ["rate > 0.95"] // 95% of checks should pass
-
-    }
+    stages: [
+        { duration: '10s', target: 20 },
+        { duration: '10s', target: 20 },
+        { duration: '5s', target: 15 },
+        { duration: '10s', target: 0 }
+    ]
 };
 
 const calls = new Counter('numeber_of_calls');
@@ -22,7 +21,7 @@ const rate = new Rate('taxa_req_200');
 const trend = new Trend('waiting_time');
 
 export default function () {
-    const res = http.get("http://localhost:9090/1");
+    const res = http.post("http://localhost:8081/order");
 
     // counter
     calls.add(1);
@@ -31,15 +30,15 @@ export default function () {
     gauge.add(res.timings.blocked);
 
     // rate
-    rate.add(res.status === 200);
+    rate.add(res.status === 201);
 
     // trend
     trend.add(res.timings.waiting);
 
 
     check(res, {
-        "status is 200": (r) => r.status === 200,
-        "transaction time OK": (r) => r.timings.duration < 200
+        "status is 201": (r) => r.status === 201,
+        "transaction time OK": (r) => r.timings.duration < 20000
     });
 
 

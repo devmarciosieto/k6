@@ -10,7 +10,7 @@ export const options = {
 const calls = new Counter('calls');
 
 export default function () {
-    const res = http.get("http://localhost:9090/1");
+    const res = http.post("http://localhost:9090/1");
     calls.add(1);
 
     check(res, {
